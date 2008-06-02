@@ -3,4 +3,4 @@ this plugin works with taskpaper.vim
 Taskpaper Vim
 http://hogbaysoftware.com/products/taskpaper_vim
 
-please install to ~/.vim/ftplugin(Unix, Linux, Mac) or ~\_vim\ftplugin(Windows)
+please install to ~/.vim/plugin(Unix, Linux, Mac) or ~\_vim\plugin(Windows)
