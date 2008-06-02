@@ -15,12 +15,12 @@ class TaskoAPI
   XMLRPC::Config.module_eval { remove_const(:ENABLE_NIL_PARSER) }
   XMLRPC::Config.const_set(:ENABLE_NIL_PARSER, true)
 
-  URL = "http://taskodone.com/api"
+  @@URL = "http://taskodone.com/api"
 
   def initialize(id, pass)
     @id = id
     @pass = pass
-    @client = XMLRPC::Client.new2(URL)
+    @client = XMLRPC::Client.new2(@@URL)
   end
 
   def papers
