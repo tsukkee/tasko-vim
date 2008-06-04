@@ -86,6 +86,7 @@ class Tasko
     end
 
     VIM.command("e " + name + ".taskpaper")
+    VIM.command("set buftype=nofile")
     body.each_with_index {|l, i|
       VIM::Buffer.current.append(i, l.chomp)
     }
