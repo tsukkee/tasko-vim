@@ -4,14 +4,32 @@ require 'xmlrpc/client'
 module XMLRPC
   module ParseContentType
     def parse_content_type(str)
+      # Hack: tasko API does not return "Content-Type"
       ["text/xml", "utf-8"]
     end
   end
 end
 # }}}
 
+# Hack Net::HTTP::HTTPResponse.read_status_line {{{
+module Net
+  class << HTTPResponse
+    def read_status_line(sock)
+      str = sock.readline
+
+      # Hack: ignore empty line in HTTP header
+      str = sock.readline if str.empty?
+
+      m = /\AHTTP(?:\/(\d+\.\d+))?\s+(\d\d\d)\s*(.*)\z/in.match(str) or
+        raise HTTPBadResponse, "wrong status line: #{str.dump}"
+      m.captures
+    end
+  end
+end
+
 # class TaskoAPI {{{
 class TaskoAPI
+  # Tasko API returns "nil" for invalid actions
   XMLRPC::Config.module_eval { remove_const(:ENABLE_NIL_PARSER) }
   XMLRPC::Config.const_set(:ENABLE_NIL_PARSER, true)
 
