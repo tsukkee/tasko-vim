@@ -15,25 +15,6 @@ module XMLRPC
 end
 # }}}
 
-# Hack Net::HTTP::HTTPResponse.read_status_line {{{
-module Net
-  class << HTTPResponse
-    def read_status_line(sock)
-      str = sock.readline
-
-      # Hack:
-      # Tasko API sometimes blank line
-      # ignore blank line in HTTP header
-      str = sock.readline if str.empty?
-
-      m = /\AHTTP(?:\/(\d+\.\d+))?\s+(\d\d\d)\s*(.*)\z/in.match(str) or
-        raise HTTPBadResponse, "wrong status line: #{str.dump}"
-      m.captures
-    end
-  end
-end
-# }}}
-
 # module VIM extension {{{
 module VIM
   # for VIM.function
@@ -106,27 +87,27 @@ class TaskoAPI
   end
 
   def papers
-    @client.call("papers", @id, @pass)
+    @client.call_async("papers", @id, @pass)
   end
 
   def paper(name)
-    @client.call("paper", @id, @pass, name)
+    @client.call_async("paper", @id, @pass, name)
   end
 
   def rename(old, new)
-    @client.call("rename", @id, @pass, old, new)
+    @client.call_async("rename", @id, @pass, old, new)
   end
 
   def edit(name, data)
-    @client.call("edit", @id, @pass, name, data)
+    @client.call_async("edit", @id, @pass, name, data)
   end
 
   def newpaper(name, data = "")
-    @client.call("new", @id, @pass, name, data)
+    @client.call_async("new", @id, @pass, name, data)
   end
 
   def delete(name)
-    @client.call("delete", @id, @pass, name)
+    @client.call_async("delete", @id, @pass, name)
   end
 end
 # }}}
@@ -195,28 +176,18 @@ if VIM.exists?("g:tasko_id") && VIM.exists?("g:tasko_token")
   tasko = Tasko.new(tasko_id, tasko_token)
 
   VIM.function("s:TaskoList") {
-    VIM.message("Tasko List")
     tasko.list
   }
 
   VIM.function("s:TaskoRead") {|name|
-    VIM.message("Tasko Read")
     tasko.read(name)
   }
 
   VIM.function("s:TaskoWrite") {
-    VIM.message("Tasko Write")
     tasko.write
   }
 else
-  VIM.message("Please set g:tasko_id and g:tasko_token")
-
-  # define empty functions
-  ["s:TaskoList", "s:TaskoRead", "s:TaskoWrite"].each {|func|
-    VIM.function(func) {
-      VIM.message("Please set g:tasko_id and g:tasko_token")
-    }
-  }
+  VIM.echoerr("Please set g:tasko_id and g:tasko_token")
 end
 # }}}
 
